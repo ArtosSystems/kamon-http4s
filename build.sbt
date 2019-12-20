@@ -1,3 +1,5 @@
+import com.amazonaws.regions.Regions
+
 /* =========================================================================================
  * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
@@ -13,6 +15,36 @@
  * =========================================================================================
  */
 
+organization := "io.artos"
+
+val baseVersion = "2.0.1-artos"
+
+val buildVersion = {
+  val branch = sys.env.get("BRANCH_NAME")
+  lazy val snapshotVersion =
+    s"$baseVersion-${branch.map(_ + "-").getOrElse("")}${sys.env.getOrElse("BUILD_NUMBER", "DEV")}-SNAPSHOT"
+
+  branch.fold {
+    println(
+      "$BRANCH_NAME environment variable not defined, creating snapshot build"
+    )
+    snapshotVersion
+  } { branchName =>
+    val master = branch.contains("master")
+    println(
+      s"$$BRANCH_NAME environment set to $branchName, creating ${if (master) "release"
+      else "snapshot"} build"
+    )
+    if (master) {
+      baseVersion
+    } else {
+      snapshotVersion
+    }
+  }
+}
+
+version in ThisBuild := buildVersion
+
 val kamonCore         = "io.kamon"    %% "kamon-core"                     % "2.0.4"
 val kamonTestkit      = "io.kamon"    %% "kamon-testkit"                  % "2.0.4"
 val kamonCommon       = "io.kamon"    %% "kamon-instrumentation-common"   % "2.0.1"
@@ -23,17 +55,38 @@ val dsl               = "org.http4s"  %%  "http4s-dsl"            % "0.20.15"
 
 val kanela            = "io.kamon"    %  "kanela-agent"           % "1.0.0"
 
+resolvers ++= Seq[Resolver](
+  s3resolver
+    .value("Aventus Releases resolver", s3("releases.repo.aventus.io"))
+    .withIvyPatterns,
+  s3resolver
+    .value("Aventus Snapshots resolver", s3("snapshots.repo.aventus.io"))
+    .withIvyPatterns,
+  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+)
 
 lazy val root = (project in file("."))
   .settings(Seq(
       name := "kamon-http4s",
       scalaVersion := "2.12.6",
       crossScalaVersions := Seq("2.11.12", "2.12.8")))
-  .settings(resolvers += Resolver.bintrayRepo("kamon-io", "snapshots"))
-  .settings(resolvers += Resolver.mavenLocal)
+//  .settings(resolvers += Resolver.bintrayRepo("kamon-io", "snapshots"))
+//  .settings(resolvers += Resolver.mavenLocal)
   .settings(scalacOptions ++= Seq("-Ypartial-unification", "-language:higherKinds"))
   .settings(
     libraryDependencies ++=
       compileScope(kamonCore, kamonCommon) ++
       providedScope(server, client, dsl, kanela) ++
       testScope(scalatest, kamonTestkit, logbackClassic))
+
+publishMavenStyle := false
+publishTo := {
+  val prefix = if (isSnapshot.value) "snapshots" else "releases"
+  Some(
+    s3resolver
+      .value(s"Aventus $prefix S3 bucket", s3(s"$prefix.repo.aventus.io"))
+      .withIvyPatterns
+  )
+}
+
+s3region := Regions.EU_WEST_2
