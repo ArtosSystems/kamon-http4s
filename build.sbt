@@ -55,13 +55,14 @@ val dsl               = "org.http4s"  %%  "http4s-dsl"            % "0.20.15"
 
 val kanela            = "io.kamon"    %  "kanela-agent"           % "1.0.0"
 
+val awsRegion = "eu-west-2"
+val s3BaseUrl = s"s3://s3-$awsRegion.amazonaws.com"
+
 resolvers ++= Seq[Resolver](
-  s3resolver
-    .value("Aventus Releases resolver", s3("releases.repo.aventus.io"))
-    .withIvyPatterns,
-  s3resolver
-    .value("Aventus Snapshots resolver", s3("snapshots.repo.aventus.io"))
-    .withIvyPatterns,
+  Resolver
+    .url("Aventus Releases resolver", url(s"$s3BaseUrl/releases.repo.aventus.io"))(Resolver.ivyStylePatterns),
+  Resolver
+    .url("Aventus Snapshots resolver", url(s"$s3BaseUrl/snapshots.repo.aventus.io"))(Resolver.ivyStylePatterns),
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
@@ -83,10 +84,7 @@ publishMavenStyle := false
 publishTo := {
   val prefix = if (isSnapshot.value) "snapshots" else "releases"
   Some(
-    s3resolver
-      .value(s"Aventus $prefix S3 bucket", s3(s"$prefix.repo.aventus.io"))
-      .withIvyPatterns
+    Resolver
+      .url(s"Aventus $prefix S3 bucket", url(s"$s3BaseUrl/$prefix.repo.aventus.io"))(Resolver.ivyStylePatterns)
   )
 }
-
-s3region := Regions.EU_WEST_2
