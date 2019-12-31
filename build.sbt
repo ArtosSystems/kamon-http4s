@@ -38,6 +38,7 @@ val buildVersion = {
     if (master) {
       baseVersion
     } else {
+      println(s"SNAPSHOT VERSION $snapshotVersion")
       snapshotVersion
     }
   }
@@ -54,9 +55,16 @@ val client            = "org.http4s"  %%  "http4s-blaze-client"   % "0.20.15"
 val dsl               = "org.http4s"  %%  "http4s-dsl"            % "0.20.15"
 
 val kanela            = "io.kamon"    %  "kanela-agent"           % "1.0.0"
+val logbackClassic = "ch.qos.logback"   %  "logback-classic" % "1.2.3"
+val scalatest      = "org.scalatest"    %% "scalatest"       % "3.0.5"
 
 val awsRegion = "eu-west-2"
 val s3BaseUrl = s"s3://s3-$awsRegion.amazonaws.com"
+
+def compileScope(deps: ModuleID*): Seq[ModuleID]  = deps map (_ % "compile")
+def testScope(deps: ModuleID*): Seq[ModuleID]     = deps map (_ % "test")
+def providedScope(deps: ModuleID*): Seq[ModuleID] = deps map (_ % "provided")
+def optionalScope(deps: ModuleID*): Seq[ModuleID] = deps map (_ % "compile,optional")
 
 resolvers ++= Seq[Resolver](
   Resolver
@@ -65,14 +73,13 @@ resolvers ++= Seq[Resolver](
     .url("Aventus Snapshots resolver", url(s"$s3BaseUrl/snapshots.repo.aventus.io"))(Resolver.ivyStylePatterns),
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
-
 lazy val root = (project in file("."))
   .settings(Seq(
       name := "kamon-http4s",
       scalaVersion := "2.12.6",
-      crossScalaVersions := Seq("2.11.12", "2.12.8")))
-//  .settings(resolvers += Resolver.bintrayRepo("kamon-io", "snapshots"))
-//  .settings(resolvers += Resolver.mavenLocal)
+      crossScalaVersions := Seq("2.11.12", "2.12.8")),
+    version := version.value
+  )
   .settings(scalacOptions ++= Seq("-Ypartial-unification", "-language:higherKinds"))
   .settings(
     libraryDependencies ++=
