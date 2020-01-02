@@ -30,7 +30,7 @@ val buildVersion = {
     )
     snapshotVersion
   } { branchName =>
-    val master = branch.contains("master")
+    val master = branch.contains("master-artos")
     println(
       s"$$BRANCH_NAME environment set to $branchName, creating ${if (master) "release"
       else "snapshot"} build"
