@@ -78,7 +78,6 @@ lazy val root = (project in file("."))
       name := "kamon-http4s",
       scalaVersion := "2.12.6",
       crossScalaVersions := Seq("2.11.12", "2.12.8")),
-    version := version.value
   )
   .settings(scalacOptions ++= Seq("-Ypartial-unification", "-language:higherKinds"))
   .settings(
