@@ -1,5 +1,3 @@
-import com.amazonaws.regions.Regions
-
 /* =========================================================================================
  * Copyright © 2013-2019 the kamon project <http://kamon.io/>
  *
@@ -86,7 +84,7 @@ lazy val root = (project in file("."))
   }))
   .settings(
     libraryDependencies ++=
-      compileScope(kamonCore, kamonCommon) ++
+      compileScope(kamonCore) ++ Seq(kamonCommon) ++
       providedScope(server, client, dsl) ++
       testScope(scalatest, kamonTestkit, logbackClassic))
 

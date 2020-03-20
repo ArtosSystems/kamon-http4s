@@ -177,5 +177,24 @@ class ServerInstrumentationSpec extends WordSpec
 
       request *> test
     }
+
+    "handle path parameter and query string" in withServerAndClient { (server, client) =>
+      val request: IO[(String, Headers)] =
+        getResponse("/tracing/bazz/ok?limit=100&page=2")(server, client)
+      val test = IO {
+        eventually(timeout(5.seconds)) {
+          val span = testSpanReporter.nextSpan().value
+
+          span.operationName shouldBe "/tracing/:name/ok"
+          span.kind shouldBe Span.Kind.Server
+          span.hasError shouldBe false
+          span.metricTags.get(plain("component")) shouldBe "http4s.server"
+          span.metricTags.get(plain("http.method")) shouldBe "GET"
+          span.metricTags.get(plainLong("http.status_code")) shouldBe 200
+        }
+      }
+
+      request *> test
+    }
   }
 }
