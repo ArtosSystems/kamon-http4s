@@ -13,9 +13,9 @@
  * =========================================================================================
  */
 
-organization := "io.artos"
+val kamonBaseVersion = "2.0.2"
 
-val baseVersion = "2.0.1-artos"
+val baseVersion = s"$kamonBaseVersion-artos"
 
 val buildVersion = {
   val branch = sys.env.get("BRANCH_NAME")
