@@ -46,7 +46,7 @@ val buildVersion = {
 
 version in ThisBuild := buildVersion
 
-val http4sVersion = "0.20.15"
+val http4sVersion = "0.21.0"
 
 val kamonCore         = "io.kamon"    %% "kamon-core"                     % "2.0.4"
 val kamonTestkit      = "io.kamon"    %% "kamon-testkit"                  % "2.0.4"
