@@ -4,3 +4,4 @@ addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.0.0")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 
 
+lazy val root = project in file(".") dependsOn(RootProject(uri("git://github.com/kamon-io/kamon-sbt-umbrella.git#kamon-2.x")))
