@@ -13,6 +13,8 @@
  * =========================================================================================
  */
 
+organization := "io.artos"
+
 val kamonBaseVersion = "2.0.2"
 
 val baseVersion = s"$kamonBaseVersion-artos"
